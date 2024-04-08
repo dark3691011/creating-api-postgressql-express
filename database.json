@@ -2,15 +2,15 @@
   "dev": {
     "driver": "pg",
     "host": "127.0.0.1",
-    "database": "fantasy_worlds",
+    "database": "storefront",
     "user": "magical_user",
     "password": "password123"
   },
   "test": {
     "driver": "pg",
     "host": "127.0.0.1",
-    "database": "fantasy_worlds_test",
-    "user": "test_user",
+    "database": "storefront_test",
+    "user": "magical_user",
     "password": "password123"
   }
 }
