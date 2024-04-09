@@ -23,7 +23,7 @@
     "@types/jasmine": "^3.6.3",
     "@types/pg": "^7.14.7",
     "jasmine": "^3.6.4",
-    "jasmine-spec-reporter": "^6.0.0",
+    "jasmine-spec-reporter": "^7.0.0",
     "jasmine-ts": "^0.3.0",
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
