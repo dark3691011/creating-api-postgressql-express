@@ -8,9 +8,9 @@ export type User = {
   password: string;
 };
 
-export class ProductStore {
-  dbName = "products";
-  async index(): Promise<Product[]> {
+export class UserStore {
+  dbName = "users";
+  async index(): Promise<User[]> {
     try {
       // @ts-ignore
       const conn = await Client.connect();
@@ -22,11 +22,11 @@ export class ProductStore {
 
       return result.rows;
     } catch (err) {
-      throw new Error(`Could not get products. Error: ${err}`);
+      throw new Error(`Could not get users. Error: ${err}`);
     }
   }
 
-  async show(id: string): Promise<Product> {
+  async show(id: string): Promise<User> {
     try {
       const sql = `SELECT * FROM ${this.dbName} WHERE id=($1)`;
       // @ts-ignore
@@ -38,29 +38,35 @@ export class ProductStore {
 
       return result.rows[0];
     } catch (err) {
-      throw new Error(`Could not find products ${id}. Error: ${err}`);
+      throw new Error(`Could not find users ${id}. Error: ${err}`);
     }
   }
 
-  async create(p: Product): Promise<Product> {
+  async create(p: User): Promise<User> {
     try {
-      const sql = `INSERT INTO ${this.dbName} (name, price) VALUES($1, $2) RETURNING *`;
+      const sql = `INSERT INTO ${this.dbName} (first_name, last_name, password) VALUES($1, $2, $3) RETURNING *`;
       // @ts-ignore
       const conn = await Client.connect();
 
-      const result = await conn.query(sql, [p.name, p.price]);
+      const result = await conn.query(sql, [
+        p.firstName,
+        p.lastName,
+        p.password,
+      ]);
 
-      const product = result.rows[0];
+      const user = result.rows[0];
 
       conn.release();
 
-      return product;
+      return user;
     } catch (err) {
-      throw new Error(`Could not add new product ${p.name}. Error: ${err}`);
+      throw new Error(
+        `Could not add new user ${p.firstName} ${p.lastName}. Error: ${err}`
+      );
     }
   }
 
-  async delete(id: string): Promise<Product> {
+  async delete(id: string): Promise<User> {
     try {
       const sql = `DELETE FROM ${this.dbName} WHERE id=($1)`;
       // @ts-ignore
@@ -68,13 +74,13 @@ export class ProductStore {
 
       const result = await conn.query(sql, [id]);
 
-      const product = result.rows[0];
+      const user = result.rows[0];
 
       conn.release();
 
-      return product;
+      return user;
     } catch (err) {
-      throw new Error(`Could not delete book ${id}. Error: ${err}`);
+      throw new Error(`Could not delete user ${id}. Error: ${err}`);
     }
   }
 }

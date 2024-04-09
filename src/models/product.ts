@@ -73,7 +73,7 @@ export class ProductStore {
 
       return product;
     } catch (err) {
-      throw new Error(`Could not delete book ${id}. Error: ${err}`);
+      throw new Error(`Could not delete user ${id}. Error: ${err}`);
     }
   }
 }
