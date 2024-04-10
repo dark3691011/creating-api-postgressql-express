@@ -1,12 +1,18 @@
 // @ts-ignore
 import Client from "../database";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export type User = {
   id?: number;
+  userName: string;
   firstName: string;
   lastName: string;
   password: string;
 };
+
+const pepper = process.env.BCRYPT_PASSWORD;
+const saltRounds = process.env.SALT_ROUNDS || "10";
 
 export class UserStore {
   dbName = "users";
@@ -42,17 +48,16 @@ export class UserStore {
     }
   }
 
-  async create(p: User): Promise<User> {
+  async create(u: User): Promise<User> {
     try {
       const sql = `INSERT INTO ${this.dbName} (first_name, last_name, password) VALUES($1, $2, $3) RETURNING *`;
+
+      const hash = bcrypt.hashSync(u.password + pepper, parseInt(saltRounds));
+
       // @ts-ignore
       const conn = await Client.connect();
 
-      const result = await conn.query(sql, [
-        p.firstName,
-        p.lastName,
-        p.password,
-      ]);
+      const result = await conn.query(sql, [u.firstName, u.lastName, hash]);
 
       const user = result.rows[0];
 
@@ -61,8 +66,30 @@ export class UserStore {
       return user;
     } catch (err) {
       throw new Error(
-        `Could not add new user ${p.firstName} ${p.lastName}. Error: ${err}`
+        `Could not add new user ${u.firstName} ${u.lastName}. Error: ${err}`
       );
+    }
+  }
+
+  async authenticate(userName: string, password: string): Promise<User | null> {
+    try {
+      const sql = `SELECT password FROM ${this.dbName} WHERE user_name=($1)`;
+      // @ts-ignore
+      const conn = await Client.connect();
+
+      const result = await conn.query(sql, [userName]);
+
+      conn.release();
+      if (result.rows?.length > 0) {
+        const user = result.rows[0];
+        if (bcrypt.compareSync(password + pepper, user.password)) {
+          return user;
+        }
+      }
+
+      return null;
+    } catch (err) {
+      throw new Error(`Could authen user ${userName}. Error: ${err}`);
     }
   }
 
