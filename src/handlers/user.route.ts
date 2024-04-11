@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import { User, UserStore } from "../models";
+import jwt from "jsonwebtoken";
 
 const store = new UserStore();
 
@@ -22,11 +23,23 @@ const create = async (req: Request, res: Response) => {
       userName: req.body.userName,
     };
 
+    const checkUser = await store.getByUserName(user.userName);
+    if (checkUser) {
+      return res.status(400).json({
+        status: 400,
+        message: "Username allready exist",
+      });
+    }
+
     const newUser = await store.create(user);
-    res.json(newUser);
-  } catch (err) {
-    res.status(400);
-    res.json(err);
+    const secret = process.env.TOKEN_SECRET || "";
+    var token = jwt.sign({ user: newUser }, secret);
+    res.json(token);
+  } catch (err: any) {
+    res.status(400).json({
+      status: 400,
+      message: err?.message,
+    });
   }
 };
 

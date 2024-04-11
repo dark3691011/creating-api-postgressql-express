@@ -1,7 +1,6 @@
 // @ts-ignore
 import Client from "../database";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
 export type User = {
   id?: number;
@@ -48,26 +47,39 @@ export class UserStore {
     }
   }
 
+  async getByUserName(userName: string) {
+    const sql = `SELECT * FROM ${this.dbName} WHERE user_name=($1)`;
+    // @ts-ignore
+    const conn = await Client.connect();
+    const result = await conn.query(sql, [userName]);
+    conn.release();
+    const user = result?.rows?.[0];
+    return user;
+  }
+
   async create(u: User): Promise<User> {
     try {
-      const sql = `INSERT INTO ${this.dbName} (first_name, last_name, password) VALUES($1, $2, $3) RETURNING *`;
+      const sql = `INSERT INTO ${this.dbName} (user_name, first_name, last_name, password) VALUES($1, $2, $3, $4) RETURNING *`;
 
       const hash = bcrypt.hashSync(u.password + pepper, parseInt(saltRounds));
 
       // @ts-ignore
       const conn = await Client.connect();
 
-      const result = await conn.query(sql, [u.firstName, u.lastName, hash]);
+      const result = await conn.query(sql, [
+        u.userName,
+        u.firstName,
+        u.lastName,
+        hash,
+      ]);
 
       const user = result.rows[0];
 
       conn.release();
 
       return user;
-    } catch (err) {
-      throw new Error(
-        `Could not add new user ${u.firstName} ${u.lastName}. Error: ${err}`
-      );
+    } catch (err: any) {
+      throw new Error(err?.message);
     }
   }
 
