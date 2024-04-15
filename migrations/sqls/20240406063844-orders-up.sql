@@ -2,7 +2,7 @@
 
 CREATE TABLE orders (
   id SERIAL NOT NULL,
-  product_id integer[],
+  product_id text,
   user_id integer,
   quantity integer,
   status integer,

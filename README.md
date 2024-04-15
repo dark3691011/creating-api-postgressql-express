@@ -58,4 +58,4 @@ Before submitting your project, spin it up and test each endpoint. If each one r
 
 // step 1 - update env and run `docker compose up` to create db
 // step 2 - run db-migrate up
-// run docker create db `docker exec -it 536f10015992 bash` `psql -U magical_user -d fantasy_worlds -c "CREATE DATABASE fantasywords_2"`
+// run docker create db `docker container ls` `docker exec -it 536f10015992 bash` `psql -U magical_user -d storefront -c "CREATE DATABASE storefront_test"`

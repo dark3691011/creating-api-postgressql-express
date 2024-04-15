@@ -1,3 +1,4 @@
+import mockOrders from "../mock/order.mock";
 import { OrderStore } from "../order";
 
 const store = new OrderStore();
@@ -9,6 +10,6 @@ describe("Order Model", () => {
 
   it("index method should return a list of orders", async () => {
     const result = await store.index();
-    expect(result).toEqual([]);
+    expect(result?.length).toEqual(mockOrders.length);
   });
 });

@@ -1,3 +1,4 @@
+import mockUsers from "../mock/user.mock";
 import { UserStore } from "../user";
 
 const store = new UserStore();
@@ -9,6 +10,6 @@ describe("User Model", () => {
 
   it("index method should return a list of users", async () => {
     const result = await store.index();
-    expect(result).toEqual([]);
+    expect(result?.length).toEqual(mockUsers.length);
   });
 });
