@@ -98,16 +98,10 @@ const register = async (req: Request, res: Response) => {
   }
 };
 
-const destroy = async (req: Request, res: Response) => {
-  const deleted = await store.delete(req.body.id);
-  res.json(deleted);
-};
-
 const userRoutes = (app: express.Application) => {
   app.get("/users", verifyAuthToken, index);
-  app.get("/users/:id", show);
+  app.get("/users/:id", verifyAuthToken, show);
   app.post("/users", register);
-  app.delete("/users/:id", destroy);
   app.post("/users/login", login);
 };
 
