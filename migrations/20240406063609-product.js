@@ -7,6 +7,8 @@ var fs = require('fs');
 var path = require('path');
 var Promise;
 
+const mockProduct = require('../dist/src/models/mock/product.mock.js')
+
 /**
   * We receive the dbmigrate dependency from dbmigrate initially.
   * This enables us to not have to rely on NODE_PATH.
@@ -30,7 +32,11 @@ exports.up = function(db) {
   })
   .then(async function(data) {
     await db.runSql(data);
-    // db.insert(tableName, columnNameArray, valueArray, callback) 
+    const mock = mockProduct?.default;
+    if(mock)
+      for(let item of mock){
+        db.insert('products', ['name', 'price'], [item.name, item.price], {}) 
+      }
   });
 };
 
