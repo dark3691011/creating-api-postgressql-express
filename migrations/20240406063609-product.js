@@ -28,8 +28,9 @@ exports.up = function(db) {
       resolve(data);
     });
   })
-  .then(function(data) {
-    return db.runSql(data);
+  .then(async function(data) {
+    await db.runSql(data);
+    // db.insert(tableName, columnNameArray, valueArray, callback) 
   });
 };
 

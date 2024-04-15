@@ -1,8 +1,12 @@
 import express, { Request, Response } from "express";
 import { User, UserStore } from "../models";
 import jwt from "jsonwebtoken";
+import { verifyAuthToken } from "../middlewares/auth";
 
 const store = new UserStore();
+const secret = process.env.TOKEN_SECRET || "";
+
+type UserRes = Omit<User, "password">;
 
 const index = async (_req: Request, res: Response) => {
   const users = await store.index();
@@ -10,11 +14,56 @@ const index = async (_req: Request, res: Response) => {
 };
 
 const show = async (req: Request, res: Response) => {
-  const user = await store.show(req.params.id);
-  res.json(user);
+  try {
+    const user = await store.show(req.params.id);
+    res.json(user);
+  } catch (error: any) {
+    res.status(400).json({
+      status: 400,
+      message: error?.message,
+    });
+  }
 };
 
-const create = async (req: Request, res: Response) => {
+const login = async (req: Request, res: Response) => {
+  try {
+    const { userName, password } = req.body;
+
+    if (!userName || !password) {
+      return res.status(400).json({
+        status: 404,
+        message: "Username and password is require",
+      });
+    }
+
+    const user: User | null = await store.authenticate(userName, password);
+
+    if (user) {
+      const token = jwt.sign({ user: user }, secret);
+      const returnUser: UserRes = {
+        userName: user.userName,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        id: user.id,
+      };
+      return res.status(200).json({
+        token,
+        user: returnUser,
+      });
+    }
+    return res.status(400).json({
+      status: 404,
+      message: "Username or password is invalid",
+    });
+  } catch (err: any) {
+    res.status(400).json({
+      status: 400,
+      message: err?.message,
+    });
+  }
+};
+
+const register = async (req: Request, res: Response) => {
   try {
     const user: User = {
       firstName: req.body.firstName,
@@ -22,6 +71,13 @@ const create = async (req: Request, res: Response) => {
       password: req.body.password,
       userName: req.body.userName,
     };
+
+    if (!user.userName || !user.password) {
+      return res.status(400).json({
+        status: 404,
+        message: "Username and password is require",
+      });
+    }
 
     const checkUser = await store.getByUserName(user.userName);
     if (checkUser) {
@@ -32,7 +88,6 @@ const create = async (req: Request, res: Response) => {
     }
 
     const newUser = await store.create(user);
-    const secret = process.env.TOKEN_SECRET || "";
     var token = jwt.sign({ user: newUser }, secret);
     res.json(token);
   } catch (err: any) {
@@ -49,10 +104,11 @@ const destroy = async (req: Request, res: Response) => {
 };
 
 const userRoutes = (app: express.Application) => {
-  app.get("/users", index);
+  app.get("/users", verifyAuthToken, index);
   app.get("/users/:id", show);
-  app.post("/users", create);
+  app.post("/users", register);
   app.delete("/users/:id", destroy);
+  app.post("/users/login", login);
 };
 
 export default userRoutes;

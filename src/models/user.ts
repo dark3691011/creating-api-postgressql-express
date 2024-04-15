@@ -19,7 +19,7 @@ export class UserStore {
     try {
       // @ts-ignore
       const conn = await Client.connect();
-      const sql = `SELECT * FROM ${this.dbName}`;
+      const sql = `SELECT user_name, first_name, last_name, id FROM ${this.dbName}`;
 
       const result = await conn.query(sql);
 
@@ -54,10 +54,10 @@ export class UserStore {
     const result = await conn.query(sql, [userName]);
     conn.release();
     const user = result?.rows?.[0];
-    return user;
+    return this.returnUser(user);
   }
 
-  async create(u: User): Promise<User> {
+  async create(u: User): Promise<User | null> {
     try {
       const sql = `INSERT INTO ${this.dbName} (user_name, first_name, last_name, password) VALUES($1, $2, $3, $4) RETURNING *`;
 
@@ -77,7 +77,7 @@ export class UserStore {
 
       conn.release();
 
-      return user;
+      return this.returnUser(user);
     } catch (err: any) {
       throw new Error(err?.message);
     }
@@ -85,7 +85,7 @@ export class UserStore {
 
   async authenticate(userName: string, password: string): Promise<User | null> {
     try {
-      const sql = `SELECT password FROM ${this.dbName} WHERE user_name=($1)`;
+      const sql = `SELECT * FROM ${this.dbName} WHERE user_name=($1)`;
       // @ts-ignore
       const conn = await Client.connect();
 
@@ -95,7 +95,7 @@ export class UserStore {
       if (result.rows?.length > 0) {
         const user = result.rows[0];
         if (bcrypt.compareSync(password + pepper, user.password)) {
-          return user;
+          return this.returnUser(user);
         }
       }
 
@@ -105,7 +105,7 @@ export class UserStore {
     }
   }
 
-  async delete(id: string): Promise<User> {
+  async delete(id: string): Promise<User | null> {
     try {
       const sql = `DELETE FROM ${this.dbName} WHERE id=($1)`;
       // @ts-ignore
@@ -117,9 +117,21 @@ export class UserStore {
 
       conn.release();
 
-      return user;
+      return this.returnUser(user);
     } catch (err) {
       throw new Error(`Could not delete user ${id}. Error: ${err}`);
     }
+  }
+
+  private returnUser(user: any) {
+    if (!user) return null;
+    const returnData: User = {
+      userName: user.user_name,
+      password: user.password,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      id: user.id,
+    };
+    return returnData;
   }
 }
