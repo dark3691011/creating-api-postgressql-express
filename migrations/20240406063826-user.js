@@ -7,6 +7,8 @@ var fs = require('fs');
 var path = require('path');
 var Promise;
 
+const mockUser = require('../dist/src/models/mock/user.mock.js')
+
 /**
   * We receive the dbmigrate dependency from dbmigrate initially.
   * This enables us to not have to rely on NODE_PATH.
@@ -28,8 +30,13 @@ exports.up = function(db) {
       resolve(data);
     });
   })
-  .then(function(data) {
-    return db.runSql(data);
+  .then(async function(data) {
+    await db.runSql(data);
+    const mock = mockUser?.default;
+    if(mock)
+      for(let item of mock){
+        db.insert('users', ['userName', 'firstName', 'lastName', 'password'], [item.userName, item.firstName, item.lastName, item.password], {}) 
+      }
   });
 };
 
