@@ -27,19 +27,42 @@ export class OrderStore {
     }
   }
 
-  async show(id: string): Promise<Order> {
+  async findByUserId(userId: string): Promise<Order> {
     try {
-      const sql = `SELECT * FROM ${this.dbName} WHERE id=($1)`;
+      const sql = `
+        SELECT
+          row_to_json(o) AS order
+        FROM (
+          SELECT
+            o.id,
+            o.product_id,
+            o.quantity,
+            o.status,
+            json_build_object(
+              'id', u.id,
+              'firstName', u.first_name,
+              'lastName', u.last_name,
+              'userName', u.user_name
+            ) AS user
+          FROM users u
+          INNER JOIN orders o ON u.id = o.user_id
+          WHERE o.user_id=($1)
+        ) AS o;
+      `;
       // @ts-ignore
       const conn = await Client.connect();
 
-      const result = await conn.query(sql, [id]);
-
+      const result = await conn.query(sql, [userId]);
+      const listOrders = result.rows?.map((e: any) => e?.order);
       conn.release();
 
-      return result.rows[0];
+      const productId = listOrders?.reduce((final: any, curr: any) => {
+        return final.push(curr?.product_id);
+      }, []);
+
+      return listOrders;
     } catch (err) {
-      throw new Error(`Could not find orders ${id}. Error: ${err}`);
+      throw new Error(`Could not find orders of user ${userId}. Error: ${err}`);
     }
   }
 

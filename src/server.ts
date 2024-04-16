@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import productRoutes from "./handlers/product.route";
 import userRoutes from "./handlers/user.route";
+import orderRoutes from "./handlers/order.route";
 
 const app: express.Application = express();
 const address: string = "http://127.0.0.1:3000/";
@@ -14,6 +15,7 @@ app.get("/", function (req: Request, res: Response) {
 
 productRoutes(app);
 userRoutes(app);
+orderRoutes(app);
 
 app.listen(3000, function () {
   console.log(`starting app on: ${address}`);
