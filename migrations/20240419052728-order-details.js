@@ -7,7 +7,7 @@ var fs = require("fs");
 var path = require("path");
 var Promise;
 
-const mockOrder = require("../dist/src/models/mock/order.mock.js");
+const mockData = require("../dist/src/models/mock/order-detail.mock.js");
 
 /**
  * We receive the dbmigrate dependency from dbmigrate initially.
@@ -21,7 +21,11 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  var filePath = path.join(__dirname, "sqls", "20240406063844-orders-up.sql");
+  var filePath = path.join(
+    __dirname,
+    "sqls",
+    "20240419052728-order-details-up.sql"
+  );
   return new Promise(function (resolve, reject) {
     fs.readFile(filePath, { encoding: "utf-8" }, function (err, data) {
       if (err) return reject(err);
@@ -31,13 +35,13 @@ exports.up = function (db) {
     });
   }).then(async function (data) {
     await db.runSql(data);
-    const mock = mockOrder?.default;
+    const mock = mockData?.default;
     if (mock)
       for (let item of mock) {
         db.insert(
-          "orders",
-          ["user_id", "status"],
-          [item.userId, item.status],
+          "order_details",
+          ["quantity", "product_id", "order_id"],
+          [item.quantity, item.productId, item.orderId],
           {}
         );
       }
@@ -45,7 +49,11 @@ exports.up = function (db) {
 };
 
 exports.down = function (db) {
-  var filePath = path.join(__dirname, "sqls", "20240406063844-orders-down.sql");
+  var filePath = path.join(
+    __dirname,
+    "sqls",
+    "20240419052728-order-details-down.sql"
+  );
   return new Promise(function (resolve, reject) {
     fs.readFile(filePath, { encoding: "utf-8" }, function (err, data) {
       if (err) return reject(err);

@@ -58,4 +58,6 @@ Before submitting your project, spin it up and test each endpoint. If each one r
 
 // step 1 - update env and run `docker compose up` to create db
 // step 2 - run db-migrate up
+
+// /docker-entrypoint-initdb.d/create-databases.sh: cannot execute: required file not found
 // run docker create db `docker container ls` `docker exec -it 536f10015992 bash` `psql -U magical_user -d storefront -c "CREATE DATABASE storefront_test"`

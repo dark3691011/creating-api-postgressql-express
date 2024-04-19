@@ -1,13 +1,33 @@
 // @ts-ignore
 import Client from "../database";
+import { User } from "./user";
 
 export type Order = {
   id: number;
-  productId: number[];
   userId: number;
-  quantity: number;
-  status: number;
+  status: StatusOrder;
 };
+
+enum StatusOrder {
+  ACTIVE = 1,
+  COMPLETE = 2,
+}
+
+export interface OrderRes {
+  id: number;
+  status: StatusOrder;
+  user: User;
+  details: Detail[];
+}
+
+export interface Detail {
+  id: number;
+  name: string;
+  quantity: number;
+  price: string;
+  orderId: number;
+  productId: number;
+}
 
 export class OrderStore {
   dbName = "orders";
@@ -27,40 +47,54 @@ export class OrderStore {
     }
   }
 
-  async findByUserId(userId: string): Promise<Order> {
+  async findByUserId(userId: string): Promise<OrderRes> {
     try {
-      const sql = `
-        SELECT
-          row_to_json(o) AS order
-        FROM (
-          SELECT
+      const sql = `SELECT
             o.id,
-            o.product_id,
-            o.quantity,
             o.status,
             json_build_object(
               'id', u.id,
+              'userName', u.user_name,
               'firstName', u.first_name,
-              'lastName', u.last_name,
-              'userName', u.user_name
+              'lastName', u.last_name
             ) AS user
-          FROM users u
-          INNER JOIN orders o ON u.id = o.user_id
-          WHERE o.user_id=($1)
-        ) AS o;
-      `;
+          FROM orders o
+          INNER JOIN users u ON u.id = o.user_id
+          WHERE o.user_id=($1)`;
       // @ts-ignore
       const conn = await Client.connect();
+      const result = [];
+      const queryOrder = await conn.query(sql, [userId]);
+      if (queryOrder.rows?.length > 0) {
+        const sqlOrderDetails = `SELECT o.id, o.order_id , o.quantity, p.name, p.price, p.id as product_id
+        FROM order_details o
+        INNER JOIN products p ON p.id = o.product_id
+        WHERE o.order_id IN ('${queryOrder.rows.map((e: Order) => e.id).join("','")}')`;
+        const queryDetails = await conn.query(sqlOrderDetails);
+        const details = queryDetails.rows?.map((e: any) => {
+          return {
+            id: e.id,
+            name: e.name,
+            quantity: e.quantity,
+            price: e.price,
+            orderId: e.order_id,
+            productId: e.product_id,
+          };
+        });
 
-      const result = await conn.query(sql, [userId]);
-      const listOrders = result.rows?.map((e: any) => e?.order);
+        for (let item of queryOrder.rows) {
+          result.push({
+            ...item,
+            details: details?.filter(
+              (detail: any) => detail.orderId === item.id
+            ),
+          });
+        }
+      }
+
       conn.release();
 
-      const productId = listOrders?.reduce((final: any, curr: any) => {
-        return final.push(curr?.product_id);
-      }, []);
-
-      return listOrders;
+      return result as unknown as OrderRes;
     } catch (err) {
       throw new Error(`Could not find orders of user ${userId}. Error: ${err}`);
     }
@@ -68,16 +102,11 @@ export class OrderStore {
 
   async create(p: Order): Promise<Order> {
     try {
-      const sql = `INSERT INTO ${this.dbName} (product_id, user_id, quantity, status ) VALUES($1, $2, $3, $4) RETURNING *`;
+      const sql = `INSERT INTO ${this.dbName} ( user_id,  status ) VALUES($1, $2) RETURNING *`;
       // @ts-ignore
       const conn = await Client.connect();
 
-      const result = await conn.query(sql, [
-        p.productId,
-        p.userId,
-        p.quantity,
-        p.status,
-      ]);
+      const result = await conn.query(sql, [p.userId, p.status]);
 
       const product = result.rows[0];
 

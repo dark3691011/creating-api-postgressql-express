@@ -7,7 +7,8 @@
     "start": "nodemon src/server.ts",
     "watch": "tsc-watch --esModuleInterop src/server.ts --outDir ./dist --onSuccess \"node ./dist/server.js\"",
     "test": "tsc && db-migrate --env test reset && db-migrate --env test up && cross-env ENV=test jasmine-ts ",
-    "build": "tsc"
+    "build": "tsc",
+    "migrate": "db-migrate up"
   },
   "author": "Udacity",
   "license": "ISC",

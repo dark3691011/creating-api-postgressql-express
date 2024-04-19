@@ -101,7 +101,7 @@ const register = async (req: Request, res: Response) => {
 const userRoutes = (app: express.Application) => {
   app.get("/users", verifyAuthToken, index);
   app.get("/users/:id", verifyAuthToken, show);
-  app.post("/users", register);
+  app.post("/users", verifyAuthToken, register);
   app.post("/users/login", login);
 };
 

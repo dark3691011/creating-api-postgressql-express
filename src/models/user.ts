@@ -25,15 +25,15 @@ export class UserStore {
 
       conn.release();
 
-      return result.rows;
+      return result.rows?.map((e: any) => this.returnUser(e));
     } catch (err) {
       throw new Error(`Could not get users. Error: ${err}`);
     }
   }
 
-  async show(id: string): Promise<User> {
+  async show(id: string): Promise<User | null> {
     try {
-      const sql = `SELECT * FROM ${this.dbName} WHERE id=($1)`;
+      const sql = `SELECT id, first_name, last_name, user_name FROM ${this.dbName} WHERE id=($1)`;
       // @ts-ignore
       const conn = await Client.connect();
 
@@ -41,7 +41,7 @@ export class UserStore {
 
       conn.release();
 
-      return result.rows[0];
+      return this.returnUser(result.rows[0]);
     } catch (err) {
       throw new Error(`Could not find users ${id}. Error: ${err}`);
     }
@@ -126,11 +126,11 @@ export class UserStore {
   private returnUser(user: any) {
     if (!user) return null;
     const returnData: User = {
+      id: user.id,
       userName: user.user_name,
       password: user.password,
       firstName: user.first_name,
       lastName: user.last_name,
-      id: user.id,
     };
     return returnData;
   }
