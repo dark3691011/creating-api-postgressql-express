@@ -38,7 +38,7 @@ exports.up = function (db) {
     const mock = mockData?.default;
     if (mock)
       for (let item of mock) {
-        db.insert(
+        await db.insert(
           "order_details",
           ["quantity", "product_id", "order_id"],
           [item.quantity, item.productId, item.orderId],

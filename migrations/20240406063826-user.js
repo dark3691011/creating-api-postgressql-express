@@ -42,7 +42,7 @@ exports.up = function (db) {
           item.password + pepper,
           parseInt(saltRounds)
         );
-        db.insert(
+        await db.insert(
           "users",
           ["user_name", "first_name", "last_name", "password"],
           [item.userName, item.firstName, item.lastName, hash],

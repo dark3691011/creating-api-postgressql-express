@@ -34,7 +34,7 @@ exports.up = function (db) {
     const mock = mockOrder?.default;
     if (mock)
       for (let item of mock) {
-        db.insert(
+        await db.insert(
           "orders",
           ["user_id", "status"],
           [item.userId, item.status],
