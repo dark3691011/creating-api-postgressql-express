@@ -16,7 +16,7 @@ const show = async (req: Request, res: Response) => {
   }
 };
 
-const orderRoutes = (app: express.Application) => {
+const orderRoutes = (app: express.Router) => {
   app.get("/orders/:user_id", verifyAuthToken, show);
 };
 

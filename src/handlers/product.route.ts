@@ -29,7 +29,7 @@ const create = async (req: Request, res: Response) => {
   }
 };
 
-const productRoutes = (app: express.Application) => {
+const productRoutes = (app: express.Router) => {
   app.get("/products", index);
   app.get("/products/:id", show);
   app.post("/products", verifyAuthToken, create);

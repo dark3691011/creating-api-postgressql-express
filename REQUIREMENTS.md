@@ -8,9 +8,9 @@ These are the notes from a meeting with the frontend developer that describe wha
 
 #### Products
 
-- Index: '/products' [GET]
-- Show: '/products/:id' [GET]
-- Create [token required]: '/products' [POST]
+- Index: 'api/products' [GET]
+- Show: 'api/products/:id' [GET]
+- Create [token required]: 'api/products' [POST]
   - exp payload:
     {
     "name": "Red T-Shirt",
@@ -19,9 +19,9 @@ These are the notes from a meeting with the frontend developer that describe wha
 
 #### Users
 
-- Index [token required]: '/users' [GET]
-- Show [token required]: '/users/:id' [GET]
-- Create N[token required]: '/users' [POST]
+- Index [token required]: 'api/users' [GET]
+- Show [token required]: 'api/users/:id' [GET]
+- Create N[token required]: 'api/users' [POST]
   - exp payload:
     {
     "userName": "admin09",
@@ -29,7 +29,7 @@ These are the notes from a meeting with the frontend developer that describe wha
     "lastName": "01",
     "password": "1"
     }
-- Login: '/users/login' [POST]
+- Login: 'api/users/login' [POST]
   - exp payload:
     {
     "userName": "admin01",
@@ -38,7 +38,7 @@ These are the notes from a meeting with the frontend developer that describe wha
 
 #### Orders
 
-- Current Order by user (args: user id)[token required]: '/orders/:user_id' [GET]
+- Current Order by user (args: user id)[token required]: 'api/orders/:user_id' [GET]
 
 ## Database
 
@@ -72,6 +72,8 @@ status integer,
 PRIMARY KEY(id),
 FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+#### Order details
 
 order_details (
 id SERIAL NOT NULL,  
