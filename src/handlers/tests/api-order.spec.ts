@@ -2,7 +2,7 @@ import supertest from "supertest";
 import app from "../../server";
 
 const request = supertest(app);
-describe("Test endpoint responses", () => {
+describe("Test api orders", () => {
   let token: string;
   beforeAll(async () => {
     const loginRes = await request.post("/api/users/login").send({
