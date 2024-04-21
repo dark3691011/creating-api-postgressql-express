@@ -7,7 +7,15 @@ export type User = {
   userName: string;
   firstName: string;
   lastName: string;
-  password: string;
+  password?: string;
+};
+
+export type UserDB = {
+  id?: number;
+  user_name?: string;
+  first_name?: string;
+  last_name?: string;
+  password?: string;
 };
 
 const pepper = process.env.BCRYPT_PASSWORD;
@@ -25,7 +33,7 @@ export class UserStore {
 
       conn.release();
 
-      return result.rows?.map((e: any) => this.returnUser(e));
+      return result.rows?.map((e: UserDB) => this.returnUser(e));
     } catch (err) {
       throw new Error(`Could not get users. Error: ${err}`);
     }
@@ -61,7 +69,10 @@ export class UserStore {
     try {
       const sql = `INSERT INTO ${this.dbName} (user_name, first_name, last_name, password) VALUES($1, $2, $3, $4) RETURNING *`;
 
-      const hash = bcrypt.hashSync(u.password + pepper, parseInt(saltRounds));
+      const hash = bcrypt.hashSync(
+        (u.password || "") + pepper,
+        parseInt(saltRounds)
+      );
 
       // @ts-ignore
       const conn = await Client.connect();
@@ -123,14 +134,14 @@ export class UserStore {
     }
   }
 
-  private returnUser(user: any) {
+  private returnUser(user: UserDB) {
     if (!user) return null;
     const returnData: User = {
       id: user.id,
-      userName: user.user_name,
+      userName: user.user_name || "",
       password: user.password,
-      firstName: user.first_name,
-      lastName: user.last_name,
+      firstName: user.first_name || "",
+      lastName: user.last_name || "",
     };
     return returnData;
   }
