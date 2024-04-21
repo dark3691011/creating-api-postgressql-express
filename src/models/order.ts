@@ -71,6 +71,8 @@ export class OrderStore {
         INNER JOIN products p ON p.id = o.product_id
         WHERE o.order_id IN ('${queryOrder.rows.map((e: Order) => e.id).join("','")}')`;
         const queryDetails = await conn.query(sqlOrderDetails);
+
+        // any because of this type is only from join db, not be used anywhere else
         const details = queryDetails.rows?.map((e: any) => {
           return {
             id: e.id,
@@ -86,7 +88,7 @@ export class OrderStore {
           result.push({
             ...item,
             details: details?.filter(
-              (detail: any) => detail.orderId === item.id
+              (detail: Detail) => detail.orderId === item.id
             ),
           });
         }
