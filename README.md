@@ -6,15 +6,18 @@
 
 ### 2. Setup DB
 
-- run `docker compose up` to create dev and test db
-- change file database.json if you change config in .env
-- run `npm run migrate` to start migration
+- Default PORT: `5432`
 
-* Note: This error may happen because of operating system `/docker-entrypoint-initdb.d/create-databases.sh: cannot execute: required file not found`. So you can create test db manually:
+- Delete and then create new file `create-databases.sh` with same content (for some reason it only accept new file .sh)
+- Run `docker compose up` to create dev and test db
+- Change file database.json if you change config in .env
+- Run `npm run migrate` to start migration
+
+* Note: If you didn't delete and create new file `create-databases.sh`, this error may happen because of operating system `/docker-entrypoint-initdb.d/create-databases.sh: cannot execute: required file not found`. So you can create test db manually:
 
 - Start container that we just created before
-- run `docker container ls` to get container id
-- run `docker exec -it <id> bash` -> run `psql -U magical_user -d storefront -c "CREATE DATABASE storefront_test"`
+- Run `docker container ls` to get container id
+- Run `docker exec -it <id> bash` -> run `psql -U magical_user -d storefront -c "CREATE DATABASE storefront_test"`
 
 ### 3. Script
 
@@ -25,4 +28,4 @@
 
 ### 4. API
 
-- in REQUIREMENTS.md
+- In REQUIREMENTS.md
